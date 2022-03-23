@@ -1,0 +1,35 @@
+---
+version: '3'
+services:
+  redis:
+    image: redis
+    container_name: redis
+    hostname: redis
+    expose:
+      - 6379
+
+  redis-commander:
+    container_name: redis-commander
+    hostname: redis-commander
+    image: rediscommander/redis-commander:latest
+    restart: always
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - "8081:8081"
+
+  app:
+    build: ./
+    volumes:
+      - ./:/var/www/app
+    links:
+      - redis
+    ports:
+      - 3000:3000
+    environment:
+      - REDIS_URL=redis://redis
+      - NODE_ENV=development
+      - PORT=3000
+    command:
+      sh -c 'npm i && node server.js'
+
